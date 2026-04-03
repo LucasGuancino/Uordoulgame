@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uordoul</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%236aaa64'/><text x='50%' y='50%' font-family='Arial' font-weight='bold' font-size='75' fill='white' dominant-baseline='central' text-anchor='middle'>U</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="toast-container"></div>
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Bem-vindo ao Uordoul</h2>
+            <p>Faça login para salvar o seu rank, subir de patente e competir com seus amigos!</p>
+            <button id="google-login-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Continuar com o Google
+            </button>
+        </div>
+    </div>
+
+    <div id="result-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="result-title">Vitória!</h2>
+            <div class="rank-container">
+                <div class="result-rank-image-container">
+                    <img id="result-rank-icon" src="" alt="" class="result-rank-icon">
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                    <div id="progress-change-fill" class="progress-change-fill"></div>
+                </div>
+                <div class="points-info">
+                    <span id="result-points-change">-- pts</span>
+                    <span id="result-points-total">Total: --</span>
+                </div>
+            </div>
+            <div class="stats-container">
+                <p>Taxa de Acerto: <strong id="result-winrate">--%</strong></p>
+            </div>
+            <div class="share-container">
+                <p>Compartilhe seu resultado:</p>
+                <button id="share-btn">📋 Copiar Tentativas</button>
+            </div>
+            <button id="modal-leaderboard-btn" class="secondary-btn" style="margin-bottom: 10px; border-color: var(--present); color: var(--present); font-weight: bold;">
+                🏆 Ver Ranking
+            </button>
+            <button id="close-result-btn" class="secondary-btn">Fechar</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-modal" class="modal hidden">
+        <div class="modal-content leaderboard-content">
+            <h2>🏆 Ranking:</h2>
+            <div class="table-container">
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Jogador</th>
+                            <th style="text-align: center;">Pontos</th>
+                            <th style="text-align: center;">Patente</th>
+                            <th style="text-align: center;">Win Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
+            <button id="close-leaderboard-btn" class="secondary-btn">Fechar</button>
+        </div>
+    </div>
+
+    <header>
+        <h1>UORDOUL</h1>
+        <div class="header-actions">
+            <button id="open-leaderboard-btn" title="Ranking">🏆</button>
+            <div id="user-info">
+                <div id="profile" class="hidden">
+                    <img id="user-avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
+                    <div class="user-details">
+                        <span id="user-name"></span>
+                        <span id="user-rank"></span>
+                    </div>
+                    <button id="logout-btn" title="Sair">🚪</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="game-container">
+        <div id="board"></div>
+        <div id="keyboard"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
