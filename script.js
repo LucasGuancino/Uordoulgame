@@ -99,7 +99,9 @@ function showResultModal(isWin, pointsChange, totalPoints, rankDetails, jogos, v
     if (oldElo && newIndex > oldIndex) {
         rankIconEl.src = `assets/${getRankImageName(oldElo)}`;
         setTimeout(() => {
-            new Audio('assets/xpsound.mp3').play().catch(e => {});
+            const xpSound = new Audio('assets/xpsound.mp3');
+            xpSound.volume = 0.6;
+            xpSound.play().catch(e => {});
             rankIconEl.classList.add('rank-up-anim');
             setTimeout(() => { rankIconEl.src = `assets/${getRankImageName(rankDetails.name)}`; }, 750);
         }, 800); 
