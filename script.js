@@ -233,11 +233,17 @@ async function initGame() {
         const tv = await rv.text();
         const rawValidWords = tv.split('\n').map(w => w.trim()).filter(w => w.length === 5);
 
+        validWordsMap = {}; 
         rawValidWords.forEach(word => {
-            validWordsMap[normalizar(word)] = word.toUpperCase();
+            const limpa = normalizar(word);
+            const wordUpper = word.toUpperCase();
+    
+            if (!validWordsMap[limpa] || wordUpper === limpa) {
+                validWordsMap[limpa] = wordUpper;
+            }
         });
         
-        validWords = Object.keys(validWordsMap); 
+        validWords = Object.keys(validWordsMap);
     } catch (e) { 
         targetWord = "PLANO"; 
         validWords = ["PLANO"]; 
@@ -328,25 +334,38 @@ async function checkWord(isRestoring = false) {
 
     const guess = validWordsMap[guessRaw];
     const guessArray = guess.split('');
+    
+    let targetLimpa = normalizar(targetWord).split('');
+    let guessLimpa = normalizar(guess).split('');
     let correct = 0;
-    let t = targetWord.split('');
-    let g = guessArray.slice(); 
     const results = new Array(5).fill('absent');
 
-    for(let i=0; i<5; i++){ if(g[i] === t[i]){ results[i] = 'correct'; correct++; t[i]=null; g[i]=null; } }
+    for (let i = 0; i < 5; i++) {
+        if (guessLimpa[i] === targetLimpa[i]) {
+            results[i] = 'correct';
+            correct++;
+            targetLimpa[i] = null;
+            guessLimpa[i] = null;
+        }
+    }
 
-    for(let i=0; i<5; i++){ if(g[i]!==null && t.includes(g[i])){ results[i] = 'present'; t[t.indexOf(g[i])]=null; } }
+    for (let i = 0; i < 5; i++) {
+        if (guessLimpa[i] !== null && targetLimpa.includes(guessLimpa[i])) {
+            results[i] = 'present';
+            targetLimpa[targetLimpa.indexOf(guessLimpa[i])] = null;
+        }
+    }
 
     for(let i=0; i<5; i++) {
         const tile = tiles[i];
         if (!isRestoring) {
             tile.classList.add('flip');
-
+            
             setTimeout(() => {
                 tile.innerText = guessArray[i]; 
                 tile.classList.add(results[i]);
-                updateKeyboardColor(guessRaw[i], results[i]);
-            }, 250); 
+                updateKeyboardColor(guessRaw[i], results[i]); 
+            }, 250);
             
             await new Promise(r => setTimeout(r, 150));
         } else {
@@ -368,5 +387,4 @@ async function checkWord(isRestoring = false) {
     }
     else { currentAttempt++; currentTile = 0; }
 }
-
 initGame();
