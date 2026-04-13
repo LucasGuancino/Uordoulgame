@@ -8,6 +8,10 @@
     --key-bg: #818384;
 }
 
+* {
+  touch-action: manipulation;
+}
+
 body {
     background-color: var(--bg);
     color: var(--text-color);
