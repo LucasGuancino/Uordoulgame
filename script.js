@@ -187,17 +187,52 @@ document.getElementById('modal-leaderboard-btn').onclick = () => { document.getE
 
 async function loadLeaderboard() {
     document.getElementById('leaderboard-modal').classList.remove('hidden');
-    const b = document.getElementById('leaderboard-body'); b.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
-    const snap = await db.collection('usuarios').orderBy('pontos', 'desc').limit(50).get();
-    b.innerHTML = ""; let p = 1;
+    const b = document.getElementById('leaderboard-body');
+    b.innerHTML = "<tr><td colspan='4'>Carregando...</td></tr>";
+    const snap = await db.collection('usuarios')
+        .orderBy('pontos', 'desc')
+        .limit(50)
+        .get();
+
+    let users = [];
     snap.forEach(doc => {
-        const u = doc.data(); const wr = u.jogosJogados ? Math.round((u.vitorias / u.jogosJogados) * 100) : 0;
+        const u = doc.data();
+        const wr = u.jogosJogados
+            ? (u.vitorias / u.jogosJogados)
+            : 0;
+
+        users.push({ ...u, wr });
+    });
+    users.sort((a, b) => {
+        if (b.pontos !== a.pontos) return b.pontos - a.pontos;
+        return b.wr - a.wr;
+    });
+    b.innerHTML = "";
+    let p = 1;
+    users.forEach(u => {
+        const wrPercent = Math.round(u.wr * 100);
+
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td><div class="lb-user"><span class="lb-pos">${p}º</span><img src="${u.avatar}" class="lb-avatar" referrerpolicy="no-referrer"><strong>${u.nome}</strong></div></td>
-            <td style="text-align: center;"><span class="lb-pts">${u.pontos}</span></td>
-            <td style="text-align: center;"><img src="assets/${getRankImageName(u.elo)}" class="lb-rank-img" title="${u.elo}"></td>
-            <td style="text-align: center;">${wr}%</td>`;
-        b.appendChild(tr); p++;
+        tr.innerHTML = `
+            <td>
+                <div class="lb-user">
+                    <span class="lb-pos">${p}º</span>
+                    <img src="${u.avatar}" class="lb-avatar" referrerpolicy="no-referrer">
+                    <strong>${u.nome}</strong>
+                </div>
+            </td>
+            <td style="text-align: center;">
+                <span class="lb-pts">${u.pontos}</span>
+            </td>
+            <td style="text-align: center;">
+                <img src="assets/${getRankImageName(u.elo)}" class="lb-rank-img" title="${u.elo}">
+            </td>
+            <td style="text-align: center;">
+                ${wrPercent}%
+            </td>
+        `;
+        b.appendChild(tr);
+        p++;
     });
 }
 
