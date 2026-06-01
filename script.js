@@ -20,7 +20,8 @@ function normalizar(str) {
 }
 
 const RANKS = [
-    { name: "Prata 1", min: 0, max: 400 }, { name: "Prata 2", min: 400, max: 800 },
+    { name: "Sem Rank Ativo", min: 0, max:0}, 
+    { name: "Prata 1", min: 100, max: 400 }, { name: "Prata 2", min: 400, max: 800 },
     { name: "Prata 3", min: 800, max: 1100 }, { name: "Prata Elite", min: 1100, max: 1700 },
     { name: "Prata Elite Mestre", min: 1700, max: 2200 }, { name: "Ouro 1", min: 2200, max: 2800 },
     { name: "Ouro 2", min: 2800, max: 3300 }, { name: "Ouro 3", min: 3300, max: 3800 },
