@@ -54,7 +54,7 @@ async function checkIfAlreadyPlayed() {
         const userData = userDoc.data(); setupUserProfile(userData.elo);
         if (userData.ultimoDiaJogado === diffInDays) { gameOver = true; showResultModal(false, 0, userData.pontos, getRankDetails(userData.pontos), userData.jogosJogados, userData.vitorias, true); }
     } else {
-        await db.collection('usuarios').doc(currentUser.uid).set({ nome: currentUser.displayName, avatar: currentUser.photoURL, pontos: 0, elo: "Prata 1", ultimoDiaJogado: -1, jogosJogados: 0, vitorias: 0 });
+        await db.collection('usuarios').doc(currentUser.uid).set({ nome: currentUser.displayName, avatar: currentUser.photoURL, pontos: 0, elo: "Sem Rank Ativo", ultimoDiaJogado: -1, jogosJogados: 0, vitorias: 0 });
         setupUserProfile("Sem Rank Ativo");
     }
 }
