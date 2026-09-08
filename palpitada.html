@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Palpitada Geográfica</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%236aaa64'/><text x='50%' y='50%' font-family='Arial' font-weight='bold' font-size='75' fill='white' dominant-baseline='central' text-anchor='middle'>U</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="palpitada.css">
+</head>
+<body class="geo-page">
+    <div id="toast-container"></div>
+
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Bem-vindo ao Uordoul</h2>
+            <p>Faça login para salvar o seu rank, subir de patente e competir com seus amigos!</p>
+            <button id="google-login-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Continuar com o Google
+            </button>
+        </div>
+    </div>
+
+    <div id="result-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="result-title">Palpitada Geográfica</h2>
+            <div class="rank-container">
+                <div class="result-rank-image-container">
+                    <img id="result-rank-icon" src="" alt="" class="result-rank-icon">
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                    <div id="progress-change-fill" class="progress-change-fill"></div>
+                </div>
+                <div class="points-info">
+                    <span id="result-points-change">-- pts</span>
+                    <span id="result-points-total">Total: --</span>
+                </div>
+            </div>
+            <div class="stats-container">
+                <p><span id="result-stat-label">Distância do alvo:</span> <strong id="result-winrate">-- km</strong></p>
+            </div>
+            <div class="share-container">
+                <p>Compartilhe seu resultado:</p>
+                <button id="share-btn">📋 Copiar Resultado</button>
+            </div>
+            <button id="modal-leaderboard-btn" class="secondary-btn leaderboard-result-btn">🏆 Ver Ranking</button>
+            <button id="close-result-btn" class="secondary-btn">Fechar</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-modal" class="modal hidden">
+        <div class="modal-content leaderboard-content">
+            <h2 id="leaderboard-title">🏆 Ranking: Geral</h2>
+            <div class="leaderboard-tabs" role="tablist" aria-label="Modos do ranking">
+                <button class="leaderboard-tab active" data-leaderboard-mode="general">Geral</button>
+                <button class="leaderboard-tab" data-leaderboard-mode="uordoul">Uordoul</button>
+                <button class="leaderboard-tab" data-leaderboard-mode="duordoul">Duordoul</button>
+                <button class="leaderboard-tab" data-leaderboard-mode="fourdoul">Fourdoul</button>
+                <button class="leaderboard-tab" data-leaderboard-mode="palpitada">Palpitada</button>
+            </div>
+            <div class="table-container">
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Jogador</th>
+                            <th class="center-cell">Pontos</th>
+                            <th class="center-cell">Patente</th>
+                            <th id="leaderboard-last-header" class="center-cell">Win Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
+            <button id="close-leaderboard-btn" class="secondary-btn">Fechar</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="brand-group">
+            <button id="menu-toggle" class="menu-toggle" title="Modos de jogo" aria-label="Abrir modos de jogo" aria-expanded="false">☰</button>
+            <h1 id="game-title">PALPITADA GEOGRÁFICA</h1>
+        </div>
+        <div class="header-actions">
+            <button id="open-leaderboard-btn" title="Ranking">🏆</button>
+            <div id="user-info">
+                <div id="profile" class="hidden">
+                    <img id="user-avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
+                    <div class="user-details">
+                        <span id="user-name"></span>
+                        <span id="user-rank"></span>
+                    </div>
+                    <button id="logout-btn" title="Sair">🚪</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav id="game-nav" class="game-nav" aria-label="Modos de jogo">
+        <div class="game-nav-inner">
+            <button class="nav-item" data-href="index.html">Uordoul</button>
+            <button class="nav-item" data-href="index.html?mode=duordoul">Duordoul</button>
+            <button class="nav-item" data-href="index.html?mode=fourdoul">Fourdoul</button>
+            <button class="nav-item active" data-href="palpitada.html">Palpitada Geográfica</button>
+        </div>
+    </nav>
+
+    <main id="game-container">
+        <section id="geo-game" class="geo-game">
+            <div id="street-view"></div>
+
+            <div id="geo-loading" class="geo-loading">
+                <div class="geo-loading-card" id="geo-loading-text">Carregando mapas...</div>
+            </div>
+
+            <button id="btn-open-map" class="hidden">Fazer Palpite 📍</button>
+
+            <div id="map-panel">
+                <div id="map-header">
+                    <h3>Marque no mapa</h3>
+                    <button id="btn-close-map" aria-label="Fechar mapa">✖</button>
+                </div>
+                <div id="map"></div>
+                <div class="geo-controls">
+                    <button id="btn-guess" disabled>Confirmar Palpite</button>
+                    <div id="geo-map-result"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="palpitada.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOac5cVmkF_Ri5yS6_3uH6XzC1mOck7HU&libraries=geometry&callback=initGoogleMaps"></script>
+</body>
+</html>
