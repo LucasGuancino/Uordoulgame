@@ -1,0 +1,145 @@
+:root {
+    --leaderboard-gold: #d4af37;
+    --leaderboard-silver: #c0c0c0;
+    --leaderboard-bronze: #cd7f32;
+}
+
+/* Colore somente o número da posição no ranking. */
+#leaderboard-body .lb-pos {
+    color: #ffffff;
+}
+
+#leaderboard-body tr:nth-child(1) .lb-pos {
+    color: var(--leaderboard-gold);
+}
+
+#leaderboard-body tr:nth-child(2) .lb-pos {
+    color: var(--leaderboard-silver);
+}
+
+#leaderboard-body tr:nth-child(3) .lb-pos {
+    color: var(--leaderboard-bronze);
+}
+
+/*
+ * Menu de modos em formato dropdown.
+ * Fica fora do fluxo da página para não deslocar o tabuleiro quando abre.
+ */
+.game-nav {
+    position: fixed;
+    top: 55px;
+    left: max(12px, calc((100vw - 1100px) / 2 + 12px));
+    width: min(310px, calc(100vw - 24px));
+    display: block;
+    background: rgba(18, 18, 19, 0.98);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.48);
+    z-index: 120;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.985);
+    transform-origin: top left;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    overflow: hidden;
+}
+
+.game-nav.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    border-bottom-color: var(--border);
+}
+
+.game-nav-inner,
+.game-nav.open .game-nav-inner {
+    width: 100%;
+    margin: 0;
+    padding: 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: visible;
+}
+
+.game-nav .nav-item {
+    position: relative;
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 14px 10px 18px;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 1.08rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: left;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease, padding-left 0.15s ease;
+}
+
+.game-nav .nav-item::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    width: 3px;
+    height: 0;
+    border-radius: 3px;
+    background: var(--correct);
+    transform: translateY(-50%);
+    transition: height 0.15s ease;
+}
+
+.game-nav .nav-item:hover,
+.game-nav .nav-item.active {
+    color: var(--correct);
+    background: rgba(106, 170, 100, 0.12);
+    border-color: transparent;
+    padding-left: 22px;
+}
+
+.game-nav .nav-item:hover::before,
+.game-nav .nav-item.active::before {
+    height: 55%;
+}
+
+.game-nav .nav-item + .nav-item {
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.game-nav .nav-item.hidden {
+    display: none !important;
+}
+
+.menu-toggle {
+    position: relative;
+    z-index: 121;
+}
+
+/* Na Palpitada o header ocupa toda a largura, então o dropdown acompanha a borda esquerda. */
+.geo-page .game-nav {
+    left: 12px;
+}
+
+@media (max-width: 760px) {
+    .game-nav,
+    .geo-page .game-nav {
+        top: 52px;
+        left: 10px;
+        width: min(290px, calc(100vw - 20px));
+    }
+
+    .game-nav .nav-item {
+        min-height: 43px;
+        padding-top: 9px;
+        padding-bottom: 9px;
+        font-size: 0.98rem;
+        letter-spacing: 1.5px;
+    }
+}
