@@ -2,13 +2,14 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Uordoul</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%236aaa64'/><text x='50%' y='50%' font-family='Arial' font-weight='bold' font-size='75' fill='white' dominant-baseline='central' text-anchor='middle'>U</text></svg>">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="toast-container"></div>
+
     <div id="login-modal" class="modal hidden">
         <div class="modal-content">
             <h2>Bem-vindo ao Uordoul</h2>
@@ -43,7 +44,7 @@
                 <p>Compartilhe seu resultado:</p>
                 <button id="share-btn">📋 Copiar Tentativas</button>
             </div>
-            <button id="modal-leaderboard-btn" class="secondary-btn" style="margin-bottom: 10px; border-color: var(--present); color: var(--present); font-weight: bold;">
+            <button id="modal-leaderboard-btn" class="secondary-btn leaderboard-result-btn">
                 🏆 Ver Ranking
             </button>
             <button id="close-result-btn" class="secondary-btn">Fechar</button>
@@ -52,15 +53,21 @@
 
     <div id="leaderboard-modal" class="modal hidden">
         <div class="modal-content leaderboard-content">
-            <h2>🏆 Ranking:</h2>
+            <h2 id="leaderboard-title">🏆 Ranking: Geral</h2>
+            <div class="leaderboard-tabs" role="tablist" aria-label="Modos do ranking">
+                <button class="leaderboard-tab active" data-leaderboard-mode="general">Geral</button>
+                <button class="leaderboard-tab" data-leaderboard-mode="uordoul">Uordoul</button>
+                <button class="leaderboard-tab" data-leaderboard-mode="duordoul">DUOrdoul</button>
+                <button class="leaderboard-tab" data-leaderboard-mode="fourdoul">FOURdoul</button>
+            </div>
             <div class="table-container">
                 <table id="leaderboard-table">
                     <thead>
                         <tr>
                             <th>Jogador</th>
-                            <th style="text-align: center;">Pontos</th>
-                            <th style="text-align: center;">Patente</th>
-                            <th style="text-align: center;">Win Rate</th>
+                            <th class="center-cell">Pontos</th>
+                            <th class="center-cell">Patente</th>
+                            <th class="center-cell">Win Rate</th>
                         </tr>
                     </thead>
                     <tbody id="leaderboard-body"></tbody>
@@ -71,7 +78,10 @@
     </div>
 
     <header>
-        <h1>UORDOUL</h1>
+        <div class="brand-group">
+            <button id="menu-toggle" class="menu-toggle" title="Modos de jogo" aria-label="Abrir modos de jogo" aria-expanded="false">☰</button>
+            <h1 id="game-title">UORDOUL</h1>
+        </div>
         <div class="header-actions">
             <button id="open-leaderboard-btn" title="Ranking">🏆</button>
             <div id="user-info">
@@ -87,10 +97,19 @@
         </div>
     </header>
 
-    <div id="game-container">
-        <div id="board"></div>
+    <nav id="game-nav" class="game-nav" aria-label="Modos de jogo">
+        <div class="game-nav-inner">
+            <button class="nav-item" data-mode="uordoul">Uordoul</button>
+            <button class="nav-item" data-mode="duordoul">DUOrdoul</button>
+            <button class="nav-item" data-mode="fourdoul">FOURdoul</button>
+            <button class="nav-item" data-action="leaderboard">LeaderBoard</button>
+        </div>
+    </nav>
+
+    <main id="game-container">
+        <div id="boards" class="boards-container"></div>
         <div id="keyboard"></div>
-    </div>
+    </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
