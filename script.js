@@ -11,7 +11,8 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const START_DATE = new Date('2026-04-02T00:00:00');
+const UORDOUL_START_DATE = new Date('2026-04-02T00:00:00');
+const MULTI_MODE_START_DATE = new Date('2026-09-08T00:00:00');
 const POINTS_TABLE = { 1: 700, 2: 500, 3: 400, 4: 300, 5: 200, 6: 100 };
 const RESULT_STRENGTH = { absent: 1, present: 2, correct: 3 };
 
@@ -22,6 +23,7 @@ const MODES = {
         boards: 1,
         attempts: 6,
         startLine: 1,
+        startDate: UORDOUL_START_DATE,
         stateKey: 'uordoulState',
         pointsField: 'pontos',
         eloField: 'elo',
@@ -35,6 +37,7 @@ const MODES = {
         boards: 2,
         attempts: 7,
         startLine: 2000,
+        startDate: MULTI_MODE_START_DATE,
         stateKey: 'duordoulState',
         pointsField: 'pontosDuordoul',
         eloField: 'eloDuordoul',
@@ -48,6 +51,7 @@ const MODES = {
         boards: 4,
         attempts: 9,
         startLine: 4000,
+        startDate: MULTI_MODE_START_DATE,
         stateKey: 'fourdoulState',
         pointsField: 'pontosFourdoul',
         eloField: 'eloFourdoul',
@@ -58,24 +62,24 @@ const MODES = {
 };
 
 const RANKS = [
-    { name: "Sem Rank Ativo", min: 0, max: 100 },
-    { name: "Prata 1", min: 100, max: 400 },
-    { name: "Prata 2", min: 400, max: 800 },
-    { name: "Prata 3", min: 800, max: 1100 },
-    { name: "Prata Elite", min: 1100, max: 1700 },
-    { name: "Prata Elite Mestre", min: 1700, max: 2200 },
-    { name: "Ouro 1", min: 2200, max: 2800 },
-    { name: "Ouro 2", min: 2800, max: 3300 },
-    { name: "Ouro 3", min: 3300, max: 3800 },
-    { name: "Ouro Master", min: 3800, max: 4400 },
-    { name: "Guardião Master 1", min: 4400, max: 5100 },
-    { name: "Guardião Master 2", min: 5100, max: 5900 },
-    { name: "Guardião Master Elite", min: 5900, max: 6700 },
-    { name: "Xerife", min: 6700, max: 7400 },
-    { name: "Águia Lendária 1", min: 7400, max: 8100 },
-    { name: "Águia Lendária 2", min: 8100, max: 9000 },
-    { name: "Supremo Master Primeira Classe", min: 9000, max: 10000 },
-    { name: "The Global Elite", min: 10000, max: 999999999 }
+    { name: 'Sem Rank Ativo', min: 0, max: 100 },
+    { name: 'Prata 1', min: 100, max: 400 },
+    { name: 'Prata 2', min: 400, max: 800 },
+    { name: 'Prata 3', min: 800, max: 1100 },
+    { name: 'Prata Elite', min: 1100, max: 1700 },
+    { name: 'Prata Elite Mestre', min: 1700, max: 2200 },
+    { name: 'Ouro 1', min: 2200, max: 2800 },
+    { name: 'Ouro 2', min: 2800, max: 3300 },
+    { name: 'Ouro 3', min: 3300, max: 3800 },
+    { name: 'Ouro Master', min: 3800, max: 4400 },
+    { name: 'Guardião Master 1', min: 4400, max: 5100 },
+    { name: 'Guardião Master 2', min: 5100, max: 5900 },
+    { name: 'Guardião Master Elite', min: 5900, max: 6700 },
+    { name: 'Xerife', min: 6700, max: 7400 },
+    { name: 'Águia Lendária 1', min: 7400, max: 8100 },
+    { name: 'Águia Lendária 2', min: 8100, max: 9000 },
+    { name: 'Supremo Master Primeira Classe', min: 9000, max: 10000 },
+    { name: 'The Global Elite', min: 10000, max: 999999999 }
 ];
 
 let validWordsMap = {};
@@ -199,9 +203,8 @@ async function checkIfAlreadyPlayed() {
 
     if (userData[mode.lastDayField] === diffInDays) {
         gameOver = true;
-        loadGameState(true);
         showResultModal(
-            false,
+            solvedBoards.every(Boolean),
             0,
             points,
             getRankDetails(points),
@@ -212,18 +215,20 @@ async function checkIfAlreadyPlayed() {
     }
 }
 
-auth.onAuthStateChanged(async user => {
-    if (user) {
-        currentUser = user;
-        document.getElementById('login-modal').classList.add('hidden');
-        document.getElementById('profile').classList.remove('hidden');
-        await checkIfAlreadyPlayed();
-    } else {
-        currentUser = null;
-        document.getElementById('login-modal').classList.remove('hidden');
-        document.getElementById('profile').classList.add('hidden');
-    }
-});
+function startAuthListener() {
+    auth.onAuthStateChanged(async user => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('profile').classList.remove('hidden');
+            await checkIfAlreadyPlayed();
+        } else {
+            currentUser = null;
+            document.getElementById('login-modal').classList.remove('hidden');
+            document.getElementById('profile').classList.add('hidden');
+        }
+    });
+}
 
 document.getElementById('google-login-btn').onclick = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
@@ -537,32 +542,30 @@ function saveGameState(guess) {
     localStorage.setItem(mode.stateKey, JSON.stringify(state));
 }
 
-function loadGameState(force = false) {
-    const state = JSON.parse(localStorage.getItem(mode.stateKey));
-    if (!state || state.dia !== diffInDays || !Array.isArray(state.tentativas)) return;
-
-    resetRuntimeState();
-    state.tentativas.forEach((guess, index) => {
-        if (index >= mode.attempts || gameOver) return;
-        currentAttempt = index;
-        currentTile = 5;
-        applyGuess(guess, true);
-    });
-
-    if (!gameOver && state.tentativas.length < mode.attempts) {
-        currentAttempt = state.tentativas.length;
-        currentTile = 0;
-    }
-
-    if (force && state.tentativas.length) gameOver = true;
-}
-
 function resetRuntimeState() {
     solvedBoards = new Array(mode.boards).fill(false);
     boardScores = new Array(mode.boards).fill(null);
     currentAttempt = 0;
     currentTile = 0;
     gameOver = false;
+}
+
+async function loadGameState() {
+    const state = JSON.parse(localStorage.getItem(mode.stateKey));
+    if (!state || state.dia !== diffInDays || !Array.isArray(state.tentativas)) return;
+
+    resetRuntimeState();
+    for (let index = 0; index < state.tentativas.length; index++) {
+        if (index >= mode.attempts || gameOver) break;
+        currentAttempt = index;
+        currentTile = 5;
+        await applyGuess(state.tentativas[index], true);
+    }
+
+    if (!gameOver && state.tentativas.length < mode.attempts) {
+        currentAttempt = state.tentativas.length;
+        currentTile = 0;
+    }
 }
 
 async function animateBoardResult(boardIndex, guess, evaluation, isRestoring) {
@@ -627,11 +630,9 @@ async function applyGuess(guess, isRestoring = false) {
         gameOver = true;
         let totalPoints = 0;
         targetWords.forEach((target, boardIndex) => {
-            if (boardScores[boardIndex] !== null) {
-                totalPoints += boardScores[boardIndex];
-            } else {
-                totalPoints += calculateLossPoints(guess, target);
-            }
+            totalPoints += boardScores[boardIndex] !== null
+                ? boardScores[boardIndex]
+                : calculateLossPoints(guess, target);
         });
         if (!isRestoring) await finalizeGame(totalPoints, false);
         return;
@@ -684,7 +685,7 @@ function getTargetWordFromLine(lines, boardIndex) {
 
 async function initGame() {
     setupNavigation();
-    diffInDays = Math.max(0, Math.floor((new Date() - START_DATE) / (1000 * 60 * 60 * 24)));
+    diffInDays = Math.max(0, Math.floor((new Date() - mode.startDate) / (1000 * 60 * 60 * 24)));
     resetRuntimeState();
 
     try {
@@ -722,7 +723,7 @@ async function initGame() {
 
     createBoards();
     createKeyboard();
-    loadGameState();
+    await loadGameState();
     setupInputs();
 }
 
@@ -738,7 +739,7 @@ document.getElementById('share-btn').onclick = () => {
 
     if (state && state.dia === diffInDays && Array.isArray(state.tentativas)) {
         state.tentativas.forEach((guess, attemptIndex) => {
-            const rows = targetWords.map((target, boardIndex) => {
+            const rows = targetWords.map(target => {
                 const solvedBefore = state.tentativas.slice(0, attemptIndex).some(previous => normalizar(previous) === normalizar(target));
                 return solvedBefore ? '⬜⬜⬜⬜⬜' : getShareRow(guess, target);
             });
@@ -794,8 +795,6 @@ async function loadLeaderboard(selectedMode = currentLeaderboardMode) {
         users.push({
             ...user,
             rankingPoints: points,
-            rankingGames: games,
-            rankingWins: wins,
             wr: games ? wins / games : 0,
             rankingElo: getRankDetails(points).name
         });
@@ -837,4 +836,9 @@ document.querySelectorAll('.leaderboard-tab').forEach(tab => {
     tab.onclick = () => loadLeaderboard(tab.dataset.leaderboardMode);
 });
 
-initGame();
+initGame()
+    .then(startAuthListener)
+    .catch(error => {
+        console.error(error);
+        startAuthListener();
+    });
