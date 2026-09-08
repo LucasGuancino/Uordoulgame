@@ -391,8 +391,8 @@ h1 {
 
 .nav-item.active,
 .nav-item:hover {
-    border-color: var(--present);
-    color: var(--present);
+    border-color: var(--correct);
+    color: var(--correct);
 }
 
 #game-container {
@@ -436,16 +436,11 @@ h1 {
 }
 
 .board-label {
-    min-height: 18px;
-    font-size: 0.76rem;
-    letter-spacing: 0.08em;
-    color: #9b9b9d;
-    text-transform: uppercase;
-    font-weight: bold;
+    display: none;
 }
 
 .board-label.solved {
-    color: var(--correct);
+    display: none;
 }
 
 .board {
@@ -601,6 +596,23 @@ h1 {
     100% { transform: scale(1); filter: brightness(1); }
 }
 
+@media (min-width: 761px) {
+    .boards-container.mode-fourdoul {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .boards-container.mode-fourdoul .board {
+        --tile-size: 43px;
+        gap: 3px;
+        padding: 2px;
+    }
+
+    .boards-container.mode-fourdoul .row {
+        gap: 3px;
+    }
+}
+
 @media (max-width: 760px) {
     header {
         padding: 9px 12px;
@@ -654,10 +666,6 @@ h1 {
         border-width: 1.5px;
     }
 
-    .board-label {
-        font-size: 0.66rem;
-    }
-
     #keyboard {
         gap: 6px;
         padding: 0 4px;
@@ -708,10 +716,6 @@ h1 {
 
     .row {
         gap: 2px;
-    }
-
-    .board-label {
-        font-size: 0.58rem;
     }
 
     .modal-content {
