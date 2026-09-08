@@ -1,6 +1,11 @@
 (() => {
     const UORDOUL_DATE = { year: 2026, month: 3, day: 2 };
     const MULTI_DATE = { year: 2026, month: 8, day: 8 };
+    const MODE_LABELS = {
+        uordoul: 'Uordoul',
+        duordoul: 'Duordoul',
+        fourdoul: 'Fourdoul'
+    };
 
     function setGeneralLeaderboardHeader() {
         const row = document.querySelector('#leaderboard-table thead tr');
@@ -159,5 +164,69 @@
             if (processingGuess) return;
             return originalHandleKeyPress(key);
         };
+    }
+
+    // Ao voltar a um modo já realizado hoje, exibe o número do desafio diário.
+    if (typeof showResultModal === 'function') {
+        const originalShowResultModal = showResultModal;
+
+        showResultModal = function(isWin, pointsChange, totalPoints, rankDetails, jogos, vitorias, alreadyPlayed = false, oldElo = null) {
+            const result = originalShowResultModal.apply(this, arguments);
+
+            if (alreadyPlayed) {
+                const title = document.getElementById('result-title');
+                const modeKey = typeof currentModeKey !== 'undefined' ? currentModeKey : 'uordoul';
+                const gameNumber = typeof diffInDays !== 'undefined' ? diffInDays : null;
+                if (title && gameNumber !== null) {
+                    title.innerText = `${MODE_LABELS[modeKey] || 'Uordoul'} #${gameNumber} Realizado`;
+                }
+            }
+
+            return result;
+        };
+    }
+
+    if (typeof showGeoResultModal === 'function') {
+        const originalShowGeoResultModal = showGeoResultModal;
+
+        showGeoResultModal = function(result, alreadyPlayed) {
+            const returnValue = originalShowGeoResultModal.apply(this, arguments);
+
+            if (alreadyPlayed) {
+                const title = document.getElementById('result-title');
+                const gameNumber = typeof geoDayIndex !== 'undefined' ? geoDayIndex : null;
+                if (title && gameNumber !== null) {
+                    title.innerText = `Palpitada Geográfica #${gameNumber} Realizado`;
+                }
+            }
+
+            return returnValue;
+        };
+    }
+
+    // Comportamento de combo: fecha ao escolher um modo, clicar fora ou pressionar Esc.
+    const gameNav = document.getElementById('game-nav');
+    const menuToggle = document.getElementById('menu-toggle');
+
+    function closeGameNav() {
+        if (!gameNav || !menuToggle) return;
+        gameNav.classList.remove('open');
+        menuToggle.setAttribute('aria-expanded', 'false');
+    }
+
+    if (gameNav && menuToggle) {
+        gameNav.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => setTimeout(closeGameNav, 0));
+        });
+
+        document.addEventListener('click', event => {
+            if (!gameNav.classList.contains('open')) return;
+            if (gameNav.contains(event.target) || menuToggle.contains(event.target)) return;
+            closeGameNav();
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeGameNav();
+        });
     }
 })();
