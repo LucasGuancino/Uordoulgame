@@ -239,7 +239,7 @@ function calculateGeoScore(lat, lng) {
     const distanceKm = google.maps.geometry.spherical.computeDistanceBetween(guessLL, actualLL) / 1000;
     let rawScore = Math.floor(5000 * Math.exp(-distanceKm / 2000));
     if (distanceKm < 0.1) rawScore = 5000;
-    return { distanceKm, rawScore, adjustedScore: Math.round(rawScore / 100), guessLL, actualLL };
+    return { distanceKm, rawScore, adjustedScore: Math.round(rawScore / 10), guessLL, actualLL };
 }
 
 function revealGuessOnMap(calculation) {
