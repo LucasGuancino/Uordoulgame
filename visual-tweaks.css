@@ -162,14 +162,14 @@
         padding-bottom: max(8px, env(safe-area-inset-bottom));
     }
 
-    /* 20% maior sobre o tamanho anterior, apenas no Uordoul. */
+    /* Mais 20% sobre o tamanho atual, apenas no Uordoul. */
     .boards-container.mode-uordoul .board {
-        --tile-size: clamp(36.96px, 10.692vw, 63.36px);
+        --tile-size: clamp(44.352px, 12.8304vw, 76.032px);
     }
 }
 
 @media (max-width: 420px) {
     .boards-container.mode-uordoul .board {
-        --tile-size: clamp(33px, 10.296vw, 44.88px);
+        --tile-size: clamp(39.6px, 12.3552vw, 53.856px);
     }
 }
