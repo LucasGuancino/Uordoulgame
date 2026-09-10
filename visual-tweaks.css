@@ -142,4 +142,23 @@
         font-size: 0.98rem;
         letter-spacing: 1.5px;
     }
+
+    /*
+     * Uordoul e Duordoul: usa o espaço livre entre o cabeçalho e o teclado
+     * para manter o tabuleiro centralizado. O teclado fica encostado na
+     * parte inferior, como um teclado normal de celular.
+     * Fourdoul não entra nestes seletores e mantém o layout atual.
+     */
+    .boards-container.mode-uordoul,
+    .boards-container.mode-duordoul {
+        flex: 1 1 auto;
+        min-height: 0;
+        align-content: center;
+    }
+
+    .boards-container.mode-uordoul + #keyboard,
+    .boards-container.mode-duordoul + #keyboard {
+        flex: 0 0 auto;
+        padding-bottom: max(8px, env(safe-area-inset-bottom));
+    }
 }
