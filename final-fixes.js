@@ -204,6 +204,75 @@
         };
     }
 
+    // Compartilhamento dos modos com múltiplos tabuleiros.
+    // Cada tabuleiro deixa de gerar linhas assim que a própria palavra é acertada.
+    // Duordoul: 2 lado a lado. Fourdoul: 2 lado a lado na primeira seção e 2 na segunda.
+    const shareButton = document.getElementById('share-btn');
+    if (
+        shareButton &&
+        typeof currentModeKey !== 'undefined' &&
+        (currentModeKey === 'duordoul' || currentModeKey === 'fourdoul')
+    ) {
+        function getBoardShareRows(guesses, target) {
+            const rows = [];
+
+            for (const guess of guesses) {
+                rows.push(getShareRow(guess, target));
+                if (normalizar(guess) === normalizar(target)) break;
+            }
+
+            return rows;
+        }
+
+        function formatBoardPair(leftRows, rightRows) {
+            const lines = [];
+            const totalLines = Math.max(leftRows.length, rightRows.length);
+            const rightOnlyIndent = ' '.repeat(12);
+
+            for (let index = 0; index < totalLines; index++) {
+                const left = leftRows[index] || '';
+                const right = rightRows[index] || '';
+
+                if (left && right) {
+                    lines.push(`${left}  ${right}`);
+                } else if (left) {
+                    lines.push(left);
+                } else if (right) {
+                    lines.push(`${rightOnlyIndent}${right}`);
+                }
+            }
+
+            return lines.join('\n');
+        }
+
+        shareButton.onclick = () => {
+            const state = JSON.parse(localStorage.getItem(mode.stateKey));
+            const validState = state && state.dia === diffInDays && Array.isArray(state.tentativas);
+            const guesses = validState ? state.tentativas : [];
+            const attemptsUsed = guesses.length;
+            let text = `${mode.name} #${diffInDays} - ${gameOver && solvedBoards.every(Boolean) ? attemptsUsed : 'X'}/${mode.attempts}\n\n`;
+
+            if (guesses.length) {
+                const boardRows = targetWords.map(target => getBoardShareRows(guesses, target));
+
+                if (currentModeKey === 'duordoul') {
+                    text += formatBoardPair(boardRows[0], boardRows[1]);
+                } else {
+                    text += formatBoardPair(boardRows[0], boardRows[1]);
+                    text += '\n\n';
+                    text += formatBoardPair(boardRows[2], boardRows[3]);
+                }
+
+                text += '\n';
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                shareButton.innerText = '✅ Copiado!';
+                setTimeout(() => shareButton.innerText = '📋 Copiar Tentativas', 2000);
+            });
+        };
+    }
+
     // Comportamento de combo: fecha ao escolher um modo, clicar fora ou pressionar Esc.
     const gameNav = document.getElementById('game-nav');
     const menuToggle = document.getElementById('menu-toggle');
