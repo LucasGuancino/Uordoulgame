@@ -7,6 +7,11 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='15' fill='%236aaa64'/><text x='50%' y='50%' font-family='Arial' font-weight='bold' font-size='75' fill='white' dominant-baseline='central' text-anchor='middle'>U</text></svg>">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="palpitada.css">
+    <style>
+        .uordoul-share-action[data-share-action="copy"],
+        .uordoul-share-action[data-share-action="download"] { display: none !important; }
+        .uordoul-share-actions { grid-template-columns: 1fr !important; }
+    </style>
 </head>
 <body class="geo-page">
     <div id="toast-container"></div>
@@ -134,6 +139,91 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="palpitada.js"></script>
+    <script>
+        (() => {
+            const nativeFetch = window.fetch.bind(window);
+            const wordsTextPromise = nativeFetch('PalavrasTermo.txt', { cache: 'force-cache' }).then(response => {
+                if (!response.ok) throw new Error();
+                return response.text();
+            });
+            let shareFastMode = false;
+            let shareCanvasMode = false;
+            let palpitadaTitleDrawn = false;
+            let resetTimer = null;
+
+            window.fetch = function(input, init) {
+                const url = typeof input === 'string' ? input : (input && input.url) || '';
+                if (String(url).split('?')[0].endsWith('PalavrasTermo.txt') && init && init.cache === 'no-store') {
+                    return wordsTextPromise
+                        .then(text => new Response(text, { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }))
+                        .catch(() => nativeFetch(input, init));
+                }
+                return nativeFetch(input, init);
+            };
+
+            try {
+                const reference = firebase.firestore().collection('usuarios').doc('__share_cache__');
+                const prototype = Object.getPrototypeOf(reference);
+                const originalGet = prototype.get;
+                prototype.get = function(options) {
+                    if (shareFastMode && !options && typeof this.path === 'string' && this.path.startsWith('usuarios/')) {
+                        return originalGet.call(this, { source: 'cache' }).catch(() => originalGet.call(this));
+                    }
+                    return originalGet.call(this, options);
+                };
+            } catch (_) {}
+
+            const canvasPrototype = CanvasRenderingContext2D.prototype;
+            const originalFillText = canvasPrototype.fillText;
+            canvasPrototype.fillText = function(text, x, y, maxWidth) {
+                const palpitadaTitle = shareCanvasMode && typeof text === 'string' && text.length === 1 && x > 600 && y >= 668 && y <= 678 && String(this.font).includes('29px');
+                if (palpitadaTitle) {
+                    if (!palpitadaTitleDrawn) {
+                        palpitadaTitleDrawn = true;
+                        this.save();
+                        this.font = '700 25px Arial, sans-serif';
+                        this.textAlign = 'center';
+                        originalFillText.call(this, 'PALPITADA GEOGRÁFICA', 870, y);
+                        this.restore();
+                    }
+                    return;
+                }
+                if (maxWidth === undefined) return originalFillText.call(this, text, x, y);
+                return originalFillText.call(this, text, x, y, maxWidth);
+            };
+
+            const finishSharePatch = () => {
+                shareFastMode = false;
+                shareCanvasMode = false;
+                if (resetTimer) {
+                    clearTimeout(resetTimer);
+                    resetTimer = null;
+                }
+            };
+
+            const observer = new MutationObserver(() => {
+                const overlay = document.getElementById('uordoul-share-overlay');
+                if (overlay && !overlay.classList.contains('hidden')) finishSharePatch();
+            });
+            observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+
+            firebase.auth().onAuthStateChanged(user => {
+                if (!user) return;
+                const ref = firebase.firestore().collection('usuarios').doc(user.uid);
+                ref.get({ source: 'cache' }).catch(() => ref.get()).catch(() => {});
+            });
+
+            window.addEventListener('click', event => {
+                const button = event.target.closest && event.target.closest('#share-btn');
+                if (!button) return;
+                shareFastMode = true;
+                shareCanvasMode = true;
+                palpitadaTitleDrawn = false;
+                if (resetTimer) clearTimeout(resetTimer);
+                resetTimer = setTimeout(finishSharePatch, 30000);
+            }, true);
+        })();
+    </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDOac5cVmkF_Ri5yS6_3uH6XzC1mOck7HU&libraries=geometry&callback=initGoogleMaps"></script>
 </body>
 </html>
