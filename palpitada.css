@@ -184,7 +184,7 @@ body.geo-page {
     }
 }
 
-/* Painel do mapa redimensionável. */
+
 #map-panel {
     height: clamp(260px, 46vh, 520px);
     min-height: 220px;
