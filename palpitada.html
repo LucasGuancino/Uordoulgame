@@ -142,6 +142,10 @@
     <script>
         (() => {
             const nativeFetch = window.fetch.bind(window);
+            const nativeShare = navigator.share ? navigator.share.bind(navigator) : null;
+            if (nativeShare) {
+                navigator.share = data => nativeShare(data && Array.isArray(data.files) && data.files.length ? { files: data.files } : data);
+            }
             const wordsTextPromise = nativeFetch('PalavrasTermo.txt', { cache: 'force-cache' }).then(response => {
                 if (!response.ok) throw new Error();
                 return response.text();
