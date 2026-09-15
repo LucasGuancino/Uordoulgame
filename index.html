@@ -136,6 +136,8 @@
             let shareFastMode = false;
             let shareCanvasMode = false;
             let palpitadaTitleDrawn = false;
+            let palpitadaCircle = null;
+            let palpitadaRingDrawn = false;
             let resetTimer = null;
 
             window.fetch = function(input, init) {
@@ -162,7 +164,49 @@
 
             const canvasPrototype = CanvasRenderingContext2D.prototype;
             const originalFillText = canvasPrototype.fillText;
+            const originalArc = canvasPrototype.arc;
+            const originalStroke = canvasPrototype.stroke;
+
+            canvasPrototype.arc = function(x, y, radius, startAngle, endAngle, counterclockwise) {
+                if (shareCanvasMode && x > 820 && x < 920 && y > 840 && y < 930 && radius >= 100 && radius <= 120 && Math.abs(startAngle) < 0.001 && Math.abs(endAngle - Math.PI * 2) < 0.001) {
+                    palpitadaCircle = { x, y, radius, lineWidth: this.lineWidth, pending: true };
+                }
+                return originalArc.call(this, x, y, radius, startAngle, endAngle, counterclockwise);
+            };
+
+            canvasPrototype.stroke = function(path) {
+                if (shareCanvasMode && palpitadaCircle && palpitadaCircle.pending) {
+                    palpitadaCircle.pending = false;
+                    return;
+                }
+                return path === undefined ? originalStroke.call(this) : originalStroke.call(this, path);
+            };
+
             canvasPrototype.fillText = function(text, x, y, maxWidth) {
+                const scoreMatch = shareCanvasMode && palpitadaCircle && !palpitadaRingDrawn && typeof text === 'string' && text.match(/^(\d+) pts$/) && x > 820 && x < 920 && y > 880 && y < 950;
+                if (scoreMatch) {
+                    const score = Math.max(0, Math.min(Number(scoreMatch[1]), 500));
+                    const progress = score / 500;
+                    const styles = getComputedStyle(document.documentElement);
+                    const green = (styles.getPropertyValue('--correct') || '#6aaa64').trim();
+                    const yellow = (styles.getPropertyValue('--present') || '#c9b458').trim();
+                    this.save();
+                    this.lineWidth = palpitadaCircle.lineWidth || 5;
+                    this.lineCap = 'butt';
+                    this.strokeStyle = yellow;
+                    this.beginPath();
+                    originalArc.call(this, palpitadaCircle.x, palpitadaCircle.y, palpitadaCircle.radius, -Math.PI / 2, Math.PI * 1.5, false);
+                    originalStroke.call(this);
+                    if (progress > 0) {
+                        this.strokeStyle = green;
+                        this.beginPath();
+                        originalArc.call(this, palpitadaCircle.x, palpitadaCircle.y, palpitadaCircle.radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress, false);
+                        originalStroke.call(this);
+                    }
+                    this.restore();
+                    palpitadaRingDrawn = true;
+                }
+
                 const palpitadaTitle = shareCanvasMode && typeof text === 'string' && text.length === 1 && x > 600 && y >= 668 && y <= 678 && String(this.font).includes('29px');
                 if (palpitadaTitle) {
                     if (!palpitadaTitleDrawn) {
@@ -206,6 +250,8 @@
                 shareFastMode = true;
                 shareCanvasMode = true;
                 palpitadaTitleDrawn = false;
+                palpitadaCircle = null;
+                palpitadaRingDrawn = false;
                 if (resetTimer) clearTimeout(resetTimer);
                 resetTimer = setTimeout(finishSharePatch, 30000);
             }, true);
