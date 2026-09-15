@@ -1,0 +1,131 @@
+.uordoul-share-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(6px);
+}
+
+.uordoul-share-overlay.hidden {
+    display: none;
+}
+
+.uordoul-share-sheet {
+    width: min(520px, 100%);
+    max-height: calc(100vh - 36px);
+    overflow-y: auto;
+    background: #1e1e1e;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.55);
+    padding: 18px;
+    color: var(--text-color);
+}
+
+.uordoul-share-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.uordoul-share-header h2 {
+    margin: 0;
+    font-size: 1.08rem;
+    letter-spacing: 0.6px;
+}
+
+.uordoul-share-close {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: #2a2a2a;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.uordoul-share-preview {
+    width: 100%;
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    margin-bottom: 14px;
+}
+
+.uordoul-share-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.uordoul-share-action {
+    min-height: 48px;
+    padding: 10px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: white;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.uordoul-share-action:hover {
+    border-color: var(--correct);
+    color: var(--correct);
+    background: rgba(106, 170, 100, 0.08);
+}
+
+.uordoul-share-action.primary {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: white;
+}
+
+.uordoul-share-action.primary:hover {
+    color: white;
+    background: #5f9d5a;
+}
+
+.uordoul-share-status {
+    min-height: 20px;
+    margin: 10px 2px 0;
+    color: #bfc0c2;
+    font-size: 0.82rem;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .uordoul-share-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .uordoul-share-sheet {
+        width: 100%;
+        max-height: 92vh;
+        border-radius: 18px 18px 0 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+        padding: 16px 14px max(16px, env(safe-area-inset-bottom));
+    }
+
+    .uordoul-share-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .uordoul-share-action {
+        min-height: 50px;
+    }
+}
