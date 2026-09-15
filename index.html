@@ -169,17 +169,9 @@
 
             canvasPrototype.arc = function(x, y, radius, startAngle, endAngle, counterclockwise) {
                 if (shareCanvasMode && x > 820 && x < 920 && y > 840 && y < 930 && radius >= 100 && radius <= 120 && Math.abs(startAngle) < 0.001 && Math.abs(endAngle - Math.PI * 2) < 0.001) {
-                    palpitadaCircle = { x, y, radius, lineWidth: this.lineWidth, pending: true };
+                    palpitadaCircle = { x, y, radius };
                 }
                 return originalArc.call(this, x, y, radius, startAngle, endAngle, counterclockwise);
-            };
-
-            canvasPrototype.stroke = function(path) {
-                if (shareCanvasMode && palpitadaCircle && palpitadaCircle.pending) {
-                    palpitadaCircle.pending = false;
-                    return;
-                }
-                return path === undefined ? originalStroke.call(this) : originalStroke.call(this, path);
             };
 
             canvasPrototype.fillText = function(text, x, y, maxWidth) {
@@ -188,22 +180,17 @@
                     const score = Math.max(0, Math.min(Number(scoreMatch[1]), 500));
                     const progress = score / 500;
                     const styles = getComputedStyle(document.documentElement);
-                    const green = (styles.getPropertyValue('--correct') || '#6aaa64').trim();
                     const yellow = (styles.getPropertyValue('--present') || '#c9b458').trim();
-                    this.save();
-                    this.lineWidth = palpitadaCircle.lineWidth || 5;
-                    this.lineCap = 'butt';
-                    this.strokeStyle = yellow;
-                    this.beginPath();
-                    originalArc.call(this, palpitadaCircle.x, palpitadaCircle.y, palpitadaCircle.radius, -Math.PI / 2, Math.PI * 1.5, false);
-                    originalStroke.call(this);
-                    if (progress > 0) {
-                        this.strokeStyle = green;
+                    if (progress < 1) {
+                        this.save();
+                        this.lineWidth = 5;
+                        this.lineCap = 'butt';
+                        this.strokeStyle = yellow;
                         this.beginPath();
-                        originalArc.call(this, palpitadaCircle.x, palpitadaCircle.y, palpitadaCircle.radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress, false);
+                        originalArc.call(this, palpitadaCircle.x, palpitadaCircle.y, palpitadaCircle.radius, -Math.PI / 2 + Math.PI * 2 * progress, Math.PI * 1.5, false);
                         originalStroke.call(this);
+                        this.restore();
                     }
-                    this.restore();
                     palpitadaRingDrawn = true;
                 }
 
