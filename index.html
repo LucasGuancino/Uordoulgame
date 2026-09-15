@@ -162,7 +162,33 @@
 
             const canvasPrototype = CanvasRenderingContext2D.prototype;
             const originalFillText = canvasPrototype.fillText;
+            const originalArc = canvasPrototype.arc;
+            const originalStroke = canvasPrototype.stroke;
+
             canvasPrototype.fillText = function(text, x, y, maxWidth) {
+                const scoreMatch = shareCanvasMode && typeof text === 'string' && text.trim().match(/^(\d+(?:[.,]\d+)?)\s*pts$/i);
+                if (scoreMatch) {
+                    const score = Math.max(0, Math.min(Number(scoreMatch[1].replace(',', '.')), 500));
+                    const progress = score / 500;
+                    const styles = getComputedStyle(document.documentElement);
+                    const green = (styles.getPropertyValue('--correct') || '#6aaa64').trim();
+                    const yellow = (styles.getPropertyValue('--present') || '#c9b458').trim();
+                    this.save();
+                    this.lineWidth = 8;
+                    this.lineCap = 'butt';
+                    this.strokeStyle = yellow;
+                    this.beginPath();
+                    originalArc.call(this, 870, 884, 110, -Math.PI / 2, Math.PI * 1.5, false);
+                    originalStroke.call(this);
+                    if (progress > 0) {
+                        this.strokeStyle = green;
+                        this.beginPath();
+                        originalArc.call(this, 870, 884, 110, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress, false);
+                        originalStroke.call(this);
+                    }
+                    this.restore();
+                }
+
                 const palpitadaTitle = shareCanvasMode && typeof text === 'string' && text.length === 1 && x > 600 && y >= 668 && y <= 678 && String(this.font).includes('29px');
                 if (palpitadaTitle) {
                     if (!palpitadaTitleDrawn) {
