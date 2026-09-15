@@ -515,7 +515,7 @@ auth.onAuthStateChanged(async user => {
     }
 });
 
-/* Ajustes consolidados que antes estavam em arquivos auxiliares. */
+
 (() => {
     const UORDOUL_DATE = { year: 2026, month: 3, day: 2 };
     const MULTI_DATE = { year: 2026, month: 8, day: 8 };
@@ -657,7 +657,7 @@ auth.onAuthStateChanged(async user => {
     }
 })();
 
-/* Compartilhamento em imagem com todos os modos. */
+
 (() => {
     const DAY_MS = 24 * 60 * 60 * 1000;
     const WORD_MODES = {
