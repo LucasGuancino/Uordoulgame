@@ -1537,6 +1537,7 @@ curas
 curei
 curem
 cures
+curió
 curou
 cursa
 curse
